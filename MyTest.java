@@ -16,5 +16,13 @@ public class MyTest {
         logger.fatal("FatalMessage");
 
         logger.info("Exception", new IllegalArgumentException("Oops!"));
+
+        String test = null;
+        switch (test) {
+            case "aaa":
+                System.out.println("aaa");
+            default:
+                System.out.println("default");
+        }
     }
 }

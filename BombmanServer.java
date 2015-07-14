@@ -13,6 +13,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Random;
+import java.util.Timer;
 import java.util.function.*;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -20,16 +21,9 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.util.stream.Collectors;
-import javax.swing.JFrame;
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.JTextArea;
-import javax.swing.JTextPane;
-import javax.swing.JScrollPane;
-import javax.swing.JCheckBox;
+import javax.swing.*;
 import javax.swing.text.*;
 import javax.swing.text.html.HTMLDocument;
-import javax.swing.UIManager;
 import javax.swing.UIManager.*;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -65,12 +59,13 @@ class Item {
         this.name = name;
     }
 
-    // ÉAÉCÉeÉÄÇ…ÇÊÇ¡ÇƒêUÇÈïëÇ¢ÇïœÇ¶ÇΩÇ¢Ç∆Ç´ÇÕ
-    // powerClassÇ∆Ç©TamaClassÇ∆Ç©çÏÇÈÇ◊Ç´Ç»ÇÃÇ©Ç‡ÇµÇÍÇ»Ç¢Ç™
+    // „Ç¢„Ç§„ÉÜ„É†„Å´„Çà„Å£„Å¶ÊåØ„ÇãËàû„ÅÑ„ÇíÂ§â„Åà„Åü„ÅÑ„Å®„Åç„ÅØ
+    // powerClass„Å®„ÅãTamaClass„Å®„Åã‰Ωú„Çã„Åπ„Åç„Å™„ÅÆ„Åã„ÇÇ„Åó„Çå„Å™„ÅÑ„Åå
     void effect(Player p) {
-        if (this.name == 'óÕ') {
+        if (this.name == 'Âäõ') {
             p.power += 1;
-        } else if (this.name == 'íe') {
+        }
+        else if (this.name == 'Âºæ') {
             p.setBombLimit += 1;
         }
     }
@@ -155,23 +150,25 @@ class You extends Player {
     You(String name) {
         super(name);
         direction = "";
-        keyStates = new boolean[5];//ÇSï˚å¸Åiè„=0,â∫=1,ç∂=2,âE=3ÅjÅ{ÇyÉLÅ[=4
+        keyStates = new boolean[5];//ÔºîÊñπÂêëÔºà‰∏ä=0,‰∏ã=1,Â∑¶=2,Âè≥=3ÔºâÔºãÔº∫„Ç≠„Éº=4
         putBomb = false;
     }
 
     public ActionData action(String mapData) {
         String nextMove = "STAY";
-        if (direction == "UP" || keyStates[0]) {
+        if ("UP".equals(direction) || keyStates[0]) {
             nextMove = "UP";
-        } else if (direction == "DOWN" || keyStates[1]) {
+        }
+        else if ("DOWN".equals(direction) || keyStates[1]) {
             nextMove = "DOWN";
-        } else if (direction == "LEFT" || keyStates[2]) {
+        }
+        else if ("LEFT".equals(direction) || keyStates[2]) {
             nextMove = "LEFT";
-        } else if (direction == "RIGHT" || keyStates[3]) {
+        }
+        else if ("RIGHT".equals(direction) || keyStates[3]) {
             nextMove = "RIGHT";
         }
-        ActionData result =
-                new ActionData(this, nextMove, putBomb);
+        ActionData result = new ActionData(this, nextMove, putBomb);
         direction = "";
         putBomb = false;
         return result;
@@ -185,20 +182,18 @@ class ExAI extends Player {
     transient Process proc;
 
     ExAI(String command) {
-        super("ñ¢ê⁄ë±");
+        super("Êú™Êé•Á∂ö");
         try {
             proc = Runtime.getRuntime().exec(command);
             writer = new BufferedWriter(new OutputStreamWriter(proc.getOutputStream(), "UTF-8"));
             reader = new BufferedReader(new InputStreamReader(proc.getInputStream(), "UTF-8"));
             errorReader = new BufferedReader(new InputStreamReader(proc.getErrorStream(), "UTF-8"));
 
-            // ïWèÄÉGÉâÅ[èoóÕÇÕÉTÅ[ÉoÇÃïWèÄèoóÕÇ…êÇÇÍó¨Ç∑
+            // Ê®ôÊ∫ñ„Ç®„É©„ÉºÂá∫Âäõ„ÅØ„Çµ„Éº„Éê„ÅÆÊ®ôÊ∫ñÂá∫Âäõ„Å´ÂûÇ„ÇåÊµÅ„Åô
             new Thread(new Runnable() {
                 public void run() {
                     try {
-                        for (String line = errorReader.readLine();
-                             line != null;
-                             line = errorReader.readLine()) {
+                        for (String line = errorReader.readLine(); line != null; line = errorReader.readLine()) {
                             System.out.println(line);
                         }
                     } catch (Exception e) {
@@ -209,7 +204,7 @@ class ExAI extends Player {
             this.ch = name.charAt(0);
         } catch (Exception e) {
             System.out.println(e);
-            this.ch = 'óé';
+            this.ch = 'ËêΩ';
         }
     }
 
@@ -222,12 +217,13 @@ class ExAI extends Player {
             String[] data = raw.split(",", 3);
             if (data.length == 3) {
                 return new ActionData(this, data[0], Boolean.valueOf(data[1]), data[2]);
-            } else {
+            }
+            else {
                 return new ActionData(this, data[0], Boolean.valueOf(data[1]));
             }
         } catch (Exception e) {
             System.out.println(e);
-            this.ch = 'óé';
+            this.ch = 'ËêΩ';
             return new ActionData(this, "STAY", false);
         }
     }
@@ -246,14 +242,14 @@ class ExAI extends Player {
     public void dispose() {
         try {
             if (writer != null) {
-                System.out.println(this.name + "Ç∆ÇÃê⁄ë±ÇêÿífÇµÇƒÇ¢Ç‹Ç∑ÅB");
+                System.out.println(this.name + "„Å®„ÅÆÊé•Á∂ö„ÇíÂàáÊñ≠„Åó„Å¶„ÅÑ„Åæ„Åô„ÄÇ");
                 writer.close();
                 writer = null;
             }
             if (proc != null) {
-                System.out.println(this.name + "ÇÃèIóπÇë“Ç¡ÇƒÇ¢Ç‹Ç∑ÅB");
+                System.out.println(this.name + "„ÅÆÁµÇ‰∫Ü„ÇíÂæÖ„Å£„Å¶„ÅÑ„Åæ„Åô„ÄÇ");
                 proc.waitFor();
-                System.out.println(this.name + "Ç™èIóπÇµÇ‹ÇµÇΩÅB");
+                System.out.println(this.name + "„ÅåÁµÇ‰∫Ü„Åó„Åæ„Åó„Åü„ÄÇ");
                 proc = null;
             }
         } catch (Exception e) {
@@ -309,28 +305,15 @@ class MapData {
     List<Item> items;
     List<int[]> fires;
 
-    public MapData(int turn,
-                   List<Position> walls,
-                   List<Block> blocks,
-                   List<Player> players,
-                   List<Bomb> bombs,
-                   List<Item> items,
-                   List<Position> fires) {
+    public MapData(int turn, List<Position> walls, List<Block> blocks, List<Player> players, List<Bomb> bombs,
+            List<Item> items, List<Position> fires) {
         this.turn = turn;
-        this.walls = walls.stream()
-                .map(p -> new int[]{p.x, p.y})
-                .collect(Collectors.toList());
-        this.blocks =
-                blocks.stream()
-                        .map(b -> new int[]{b.pos.x, b.pos.y})
-                        .collect(Collectors.toList());
+        this.walls = walls.stream().map(p -> new int[]{p.x, p.y}).collect(Collectors.toList());
+        this.blocks = blocks.stream().map(b -> new int[]{b.pos.x, b.pos.y}).collect(Collectors.toList());
         this.players = players;
         this.bombs = bombs;
         this.items = items;
-        this.fires =
-                fires.stream()
-                        .map(f -> new int[]{f.x, f.y})
-                        .collect(Collectors.toList());
+        this.fires = fires.stream().map(f -> new int[]{f.x, f.y}).collect(Collectors.toList());
     }
 }
 
@@ -341,59 +324,30 @@ public class BombmanServer {
     public static final String VERSION = "0.4.6";
     public static final int INIT_FIRE_POWER = 2;
     public static final int INIT_BOMB_LIMIT = 2;
-    public static final int[][] FALLING_WALL =
-            {{1, 1}, {2, 1}, {3, 1}, {4, 1}, {5, 1}, {6, 1}, {7, 1}, {8, 1}, {9, 1}, {10, 1}, {11, 1}, {12, 1}, {13, 1}, {13, 2}, {13, 3}, {13, 4}, {13, 5}, {13, 6}, {13, 7}, {13, 8}, {13, 9}, {13, 10}, {13, 11}, {13, 12}, {13, 13}, {12, 13}, {11, 13}, {10, 13}, {9, 13}, {8, 13}, {7, 13}, {6, 13}, {5, 13}, {4, 13}, {3, 13}, {2, 13}, {1, 13}, {1, 12}, {1, 11}, {1, 10}, {1, 9}, {1, 8}, {1, 7}, {1, 6}, {1, 5}, {1, 4}, {1, 3}, {1, 2}, {2, 2}, {3, 2}, {4, 2}, {5, 2}, {6, 2}, {7, 2}, {8, 2}, {9, 2}, {10, 2}, {11, 2}, {12, 2}, {12, 3}, {12, 4}, {12, 5}, {12, 6}, {12, 7}, {12, 8}, {12, 9}, {12, 10}, {12, 11}, {12, 12}, {11, 12}, {10, 12}, {9, 12}, {8, 12}, {7, 12}, {6, 12}, {5, 12}, {4, 12}, {3, 12}, {2, 12}, {2, 11}, {2, 10}, {2, 9}, {2, 8}, {2, 7}, {2, 6}, {2, 5}, {2, 4}, {2, 3}, {3, 3}, {4, 3}, {5, 3}, {6, 3}, {7, 3}, {8, 3}, {9, 3}, {10, 3}, {11, 3}, {11, 4}, {11, 5}, {11, 6}, {11, 7}, {11, 8}, {11, 9}, {11, 10}, {11, 11}, {10, 11}, {9, 11}, {8, 11}, {7, 11}, {6, 11}, {5, 11}, {4, 11}, {3, 11}, {3, 10}, {3, 9}, {3, 8}, {3, 7}, {3, 6}, {3, 5}, {3, 4}, {4, 4}, {5, 4}, {6, 4}, {7, 4}, {8, 4}, {9, 4}, {10, 4}, {10, 5}, {10, 6}, {10, 7}, {10, 8}, {10, 9}, {10, 10}, {9, 10}, {8, 10}, {7, 10}, {6, 10}, {5, 10}, {4, 10}, {4, 9}, {4, 8}, {4, 7}, {4, 6}, {4, 5}};
+    public static final int[][] FALLING_WALL = {{1, 1}, {2, 1}, {3, 1}, {4, 1}, {5, 1}, {6, 1}, {7, 1}, {8, 1}, {9, 1}, {10, 1}, {11, 1}, {12, 1}, {13, 1}, {13, 2}, {13, 3}, {13, 4}, {13, 5}, {13, 6}, {13, 7}, {13, 8}, {13, 9}, {13, 10}, {13, 11}, {13, 12}, {13, 13}, {12, 13}, {11, 13}, {10, 13}, {9, 13}, {8, 13}, {7, 13}, {6, 13}, {5, 13}, {4, 13}, {3, 13}, {2, 13}, {1, 13}, {1, 12}, {1, 11}, {1, 10}, {1, 9}, {1, 8}, {1, 7}, {1, 6}, {1, 5}, {1, 4}, {1, 3}, {1, 2}, {2, 2}, {3, 2}, {4, 2}, {5, 2}, {6, 2}, {7, 2}, {8, 2}, {9, 2}, {10, 2}, {11, 2}, {12, 2}, {12, 3}, {12, 4}, {12, 5}, {12, 6}, {12, 7}, {12, 8}, {12, 9}, {12, 10}, {12, 11}, {12, 12}, {11, 12}, {10, 12}, {9, 12}, {8, 12}, {7, 12}, {6, 12}, {5, 12}, {4, 12}, {3, 12}, {2, 12}, {2, 11}, {2, 10}, {2, 9}, {2, 8}, {2, 7}, {2, 6}, {2, 5}, {2, 4}, {2, 3}, {3, 3}, {4, 3}, {5, 3}, {6, 3}, {7, 3}, {8, 3}, {9, 3}, {10, 3}, {11, 3}, {11, 4}, {11, 5}, {11, 6}, {11, 7}, {11, 8}, {11, 9}, {11, 10}, {11, 11}, {10, 11}, {9, 11}, {8, 11}, {7, 11}, {6, 11}, {5, 11}, {4, 11}, {3, 11}, {3, 10}, {3, 9}, {3, 8}, {3, 7}, {3, 6}, {3, 5}, {3, 4}, {4, 4}, {5, 4}, {6, 4}, {7, 4}, {8, 4}, {9, 4}, {10, 4}, {10, 5}, {10, 6}, {10, 7}, {10, 8}, {10, 9}, {10, 10}, {9, 10}, {8, 10}, {7, 10}, {6, 10}, {5, 10}, {4, 10}, {4, 9}, {4, 8}, {4, 7}, {4, 6}, {4, 5}};
 
-    public static final String[] DEFAULT_MAP =
-            {"Å°Å°Å°Å°Å°Å°Å°Å°Å°Å°Å°Å°Å°Å°Å°",
-                    "Å°Å@Å@Å@Å@Å@Å@Å@Å@Å@Å@Å@Å@Å@Å°",
-                    "Å°Å@Å°Å@Å°Å@Å°Å@Å°Å@Å°Å@Å°Å@Å°",
-                    "Å°Å@Å@Å@Å@Å@Å@Å@Å@Å@Å@Å@Å@Å@Å°",
-                    "Å°Å@Å°Å@Å°Å@Å°Å@Å°Å@Å°Å@Å°Å@Å°",
-                    "Å°Å@Å@Å@Å@Å@Å@Å@Å@Å@Å@Å@Å@Å@Å°",
-                    "Å°Å@Å°Å@Å°Å@Å°Å@Å°Å@Å°Å@Å°Å@Å°",
-                    "Å°Å@Å@Å@Å@Å@Å@Å@Å@Å@Å@Å@Å@Å@Å°",
-                    "Å°Å@Å°Å@Å°Å@Å°Å@Å°Å@Å°Å@Å°Å@Å°",
-                    "Å°Å@Å@Å@Å@Å@Å@Å@Å@Å@Å@Å@Å@Å@Å°",
-                    "Å°Å@Å°Å@Å°Å@Å°Å@Å°Å@Å°Å@Å°Å@Å°",
-                    "Å°Å@Å@Å@Å@Å@Å@Å@Å@Å@Å@Å@Å@Å@Å°",
-                    "Å°Å@Å°Å@Å°Å@Å°Å@Å°Å@Å°Å@Å°Å@Å°",
-                    "Å°Å@Å@Å@Å@Å@Å@Å@Å@Å@Å@Å@Å@Å@Å°",
-                    "Å°Å°Å°Å°Å°Å°Å°Å°Å°Å°Å°Å°Å°Å°Å°"};
+    public static final String[] DEFAULT_MAP = {"‚ñ†‚ñ†‚ñ†‚ñ†‚ñ†‚ñ†‚ñ†‚ñ†‚ñ†‚ñ†‚ñ†‚ñ†‚ñ†‚ñ†‚ñ†", "‚ñ†„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ‚ñ†", "‚ñ†„ÄÄ‚ñ†„ÄÄ‚ñ†„ÄÄ‚ñ†„ÄÄ‚ñ†„ÄÄ‚ñ†„ÄÄ‚ñ†„ÄÄ‚ñ†", "‚ñ†„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ‚ñ†", "‚ñ†„ÄÄ‚ñ†„ÄÄ‚ñ†„ÄÄ‚ñ†„ÄÄ‚ñ†„ÄÄ‚ñ†„ÄÄ‚ñ†„ÄÄ‚ñ†", "‚ñ†„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ‚ñ†", "‚ñ†„ÄÄ‚ñ†„ÄÄ‚ñ†„ÄÄ‚ñ†„ÄÄ‚ñ†„ÄÄ‚ñ†„ÄÄ‚ñ†„ÄÄ‚ñ†", "‚ñ†„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ‚ñ†", "‚ñ†„ÄÄ‚ñ†„ÄÄ‚ñ†„ÄÄ‚ñ†„ÄÄ‚ñ†„ÄÄ‚ñ†„ÄÄ‚ñ†„ÄÄ‚ñ†", "‚ñ†„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ‚ñ†", "‚ñ†„ÄÄ‚ñ†„ÄÄ‚ñ†„ÄÄ‚ñ†„ÄÄ‚ñ†„ÄÄ‚ñ†„ÄÄ‚ñ†„ÄÄ‚ñ†", "‚ñ†„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ‚ñ†", "‚ñ†„ÄÄ‚ñ†„ÄÄ‚ñ†„ÄÄ‚ñ†„ÄÄ‚ñ†„ÄÄ‚ñ†„ÄÄ‚ñ†„ÄÄ‚ñ†", "‚ñ†„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ‚ñ†", "‚ñ†‚ñ†‚ñ†‚ñ†‚ñ†‚ñ†‚ñ†‚ñ†‚ñ†‚ñ†‚ñ†‚ñ†‚ñ†‚ñ†‚ñ†"};
     public static final int HEIGHT = DEFAULT_MAP.length;
     public static final int WIDTH = DEFAULT_MAP[0].length();
     public static final int ITEM_COUNT = 20;
 
-    // Ç«Ç§èëÇØÇŒÇ¢Ç¢ÅH
-    public static final char[][] MAP_ARRAY =
-            {DEFAULT_MAP[0].toCharArray(),
-                    DEFAULT_MAP[1].toCharArray(),
-                    DEFAULT_MAP[2].toCharArray(),
-                    DEFAULT_MAP[3].toCharArray(),
-                    DEFAULT_MAP[4].toCharArray(),
-                    DEFAULT_MAP[5].toCharArray(),
-                    DEFAULT_MAP[6].toCharArray(),
-                    DEFAULT_MAP[7].toCharArray(),
-                    DEFAULT_MAP[8].toCharArray(),
-                    DEFAULT_MAP[9].toCharArray(),
-                    DEFAULT_MAP[10].toCharArray(),
-                    DEFAULT_MAP[11].toCharArray(),
-                    DEFAULT_MAP[12].toCharArray(),
-                    DEFAULT_MAP[13].toCharArray(),
-                    DEFAULT_MAP[14].toCharArray()};
+    // „Å©„ÅÜÊõ∏„Åë„Å∞„ÅÑ„ÅÑÔºü
+    public static final char[][] MAP_ARRAY = {DEFAULT_MAP[0].toCharArray(), DEFAULT_MAP[1].toCharArray(), DEFAULT_MAP[2]
+            .toCharArray(), DEFAULT_MAP[3].toCharArray(), DEFAULT_MAP[4].toCharArray(), DEFAULT_MAP[5]
+            .toCharArray(), DEFAULT_MAP[6].toCharArray(), DEFAULT_MAP[7].toCharArray(), DEFAULT_MAP[8]
+            .toCharArray(), DEFAULT_MAP[9].toCharArray(), DEFAULT_MAP[10].toCharArray(), DEFAULT_MAP[11]
+            .toCharArray(), DEFAULT_MAP[12].toCharArray(), DEFAULT_MAP[13].toCharArray(), DEFAULT_MAP[14]
+            .toCharArray()};
 
-    // Ç‡Ç¡Ç∆„YóÌÇ…èëÇØÇªÇ§ÇæÇ™èëÇ´ï˚Ç™ÇÌÇ©ÇÁÇ»Ç¢
-    public static final Position[] NEAR_INIT_POSITIONS =
-            {new Position(1, 1), new Position(1, 2), new Position(2, 1),
-                    new Position(1, HEIGHT - 2), new Position(1, HEIGHT - 3), new Position(2, HEIGHT - 2),//ç∂â∫
-                    new Position(WIDTH - 2, 1), new Position(WIDTH - 2, 2), new Position(WIDTH - 3, 1),//âEè„
-                    new Position(WIDTH - 2, HEIGHT - 2), new Position(WIDTH - 2, HEIGHT - 3), new Position(WIDTH - 3, HEIGHT - 2)};
+    // „ÇÇ„Å£„Å®Á∂∫È∫ó„Å´Êõ∏„Åë„Åù„ÅÜ„Å†„ÅåÊõ∏„ÅçÊñπ„Åå„Çè„Åã„Çâ„Å™„ÅÑ
+    public static final Position[] NEAR_INIT_POSITIONS = {new Position(1, 1), new Position(1, 2), new Position(2,
+            1), new Position(1, HEIGHT - 2), new Position(1, HEIGHT - 3), new Position(2, HEIGHT - 2),//Â∑¶‰∏ã
+            new Position(WIDTH - 2, 1), new Position(WIDTH - 2, 2), new Position(WIDTH - 3, 1),//Âè≥‰∏ä
+            new Position(WIDTH - 2, HEIGHT - 2), new Position(WIDTH - 2, HEIGHT - 3), new Position(WIDTH - 3,
+            HEIGHT - 2)};
 
-    public static final Position[] INIT_POSITIONS =
-            {new Position(1, 1),
-                    new Position(1, HEIGHT - 2),
-                    new Position(WIDTH - 2, 1),
-                    new Position(WIDTH - 2, HEIGHT - 2)};
+    public static final Position[] INIT_POSITIONS = {new Position(1, 1), new Position(1, HEIGHT - 2), new Position(
+            WIDTH - 2, 1), new Position(WIDTH - 2, HEIGHT - 2)};
 
     static final int DEFAULT_SLEEP_TIME = 500;
 
@@ -426,7 +380,7 @@ public class BombmanServer {
 
     void newGame() {
         turn = 0;
-        you = new You("Ç†Ç»ÇΩ");
+        you = new You("„ÅÇ„Å™„Åü");
         bombs = new ArrayList<>();
         if (players != null) {
             disposePlayers();
@@ -453,10 +407,10 @@ public class BombmanServer {
         }
 
         while (players.size() < 4) {
-            players.add(new AIPlayer("ìG"));
+            players.add(new AIPlayer("Êïµ"));
         }
 
-        // ÉvÉåÉCÉÑÅ[Çèâä˙à íuÇ…à⁄ìÆ
+        // „Éó„É¨„Ç§„É§„Éº„ÇíÂàùÊúü‰ΩçÁΩÆ„Å´ÁßªÂãï
         Collections.shuffle(players);
         for (int i = 0; i < players.size(); i++) {
             players.get(i).pos = INIT_POSITIONS[i];
@@ -465,7 +419,7 @@ public class BombmanServer {
 
         for (int x = 0; x < WIDTH; x++) {
             for (int y = 0; y < WIDTH; y++) {
-                if (MAP_ARRAY[y][x] == 'Å°') {
+                if (MAP_ARRAY[y][x] == '‚ñ†') {
                     walls.add(new Position(x, y));
                 }
             }
@@ -473,9 +427,7 @@ public class BombmanServer {
 
         while (blocks.size() < 90) {
             Block newBlock = new Block(randomPosition());
-            if (!isNearInitPosition(newBlock.pos)
-                    && !isWall(newBlock.pos)
-                    && !isBlock(newBlock.pos)) {
+            if (!isNearInitPosition(newBlock.pos) && !isWall(newBlock.pos) && !isBlock(newBlock.pos)) {
                 blocks.add(newBlock);
             }
         }
@@ -483,16 +435,16 @@ public class BombmanServer {
         int i = 0;
         for (; i < ITEM_COUNT / 2; i++) {
             Block b = blocks.get(i);
-            b.item = new Item('óÕ', b.pos);
+            b.item = new Item('Âäõ', b.pos);
         }
         for (; i < ITEM_COUNT; i++) {
             Block b = blocks.get(i);
-            b.item = new Item('íe', b.pos);
+            b.item = new Item('Âºæ', b.pos);
         }
         mapData = new MapData(turn, walls, blocks, players, bombs, items, fires);
         history.add(gson.toJson(mapData));
         showMap(mapData);
-        textArea.append("TURN 0: ÉQÅ[ÉÄÇ™äJénÇ≥ÇÍÇ‹ÇµÇΩ\n");
+        textArea.append("TURN 0: „Ç≤„Éº„É†„ÅåÈñãÂßã„Åï„Çå„Åæ„Åó„Åü\n");
         timer = new Timer();
         task = new UpdateTask();
         timer.schedule(task, 1000, DEFAULT_SLEEP_TIME);
@@ -509,9 +461,9 @@ public class BombmanServer {
         } catch (Exception e) {
         }
 
-        JFrame frame = new JFrame("É{ÉÄÉ}Éì " + VERSION);
+        JFrame frame = new JFrame("„Éú„É†„Éû„É≥ " + VERSION);
         frame.setBounds(100, 100, 500, 600);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent winEvt) {
                 task.cancel();
@@ -526,8 +478,7 @@ public class BombmanServer {
         infoArea.setEditable(false);
         textArea = new JTextArea();
         textArea.setRows(5);
-        scrollpane = new JScrollPane(textArea,
-                JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+        scrollpane = new JScrollPane(textArea, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                 JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         SimpleAttributeSet a = new SimpleAttributeSet();
         StyleConstants.setFontFamily(a, Font.MONOSPACED);
@@ -543,25 +494,25 @@ public class BombmanServer {
                 //System.out.println(key + "pressed");
                 switch (key) {
                     case KeyEvent.VK_UP:
-                        if (you.keyStates[0] == false) {
+                        if (!you.keyStates[0]) {
                             you.direction = "UP";
                             you.keyStates[0] = true;
                         }
                         break;
                     case KeyEvent.VK_DOWN:
-                        if (you.keyStates[1] == false) {
+                        if (!you.keyStates[1]) {
                             you.direction = "DOWN";
                             you.keyStates[1] = true;
                         }
                         break;
                     case KeyEvent.VK_LEFT:
-                        if (you.keyStates[2] == false) {
+                        if (!you.keyStates[2]) {
                             you.direction = "LEFT";
                             you.keyStates[2] = true;
                         }
                         break;
                     case KeyEvent.VK_RIGHT:
-                        if (you.keyStates[3] == false) {
+                        if (!you.keyStates[3]) {
                             you.direction = "RIGHT";
                             you.keyStates[3] = true;
                         }
@@ -600,12 +551,14 @@ public class BombmanServer {
         JButton prev = new JButton("<");
         JButton next = new JButton(">");
         JButton next2 = new JButton(">>");
-        JButton stop = new JButton("í‚é~");
-        JButton play = new JButton("çƒê∂");
-        JButton fast = new JButton("ëÅëóÇË");
-        JButton superFast = new JButton("í¥ëÅëóÇË");
-        JButton retry = new JButton("Ç‡Ç§àÍêÌ");
-        stopCheckBox = new JCheckBox("èüîsÇ™åàÇ‹Ç¡ÇΩÇÁé~ÇﬂÇÈ", true);
+        JButton stop = new JButton("ÂÅúÊ≠¢");
+        JButton play = new JButton("ÂÜçÁîü");
+        JButton fast = new JButton("Êó©ÈÄÅ„Çä");
+        JButton superFast = new JButton("Ë∂ÖÊó©ÈÄÅ„Çä");
+        JButton retry = new JButton("„ÇÇ„ÅÜ‰∏ÄÊà¶");
+        JButton log = new JButton("„É≠„Ç∞Âá∫Âäõ");
+        JButton readLog = new JButton("„É≠„Ç∞Ë™≠Ëæº");
+        stopCheckBox = new JCheckBox("ÂãùÊïó„ÅåÊ±∫„Åæ„Å£„Åü„ÇâÊ≠¢„ÇÅ„Çã", true);
         prev.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
@@ -635,7 +588,8 @@ public class BombmanServer {
                 showTurn += 1;
                 if (showTurn > turn) {
                     new UpdateTask().run();
-                } else {
+                }
+                else {
                     showMap(gson.fromJson(history.get(showTurn), MapData.class));
                 }
             }
@@ -647,7 +601,8 @@ public class BombmanServer {
                 showTurn += 10;
                 if (showTurn > turn) {
                     new UpdateTask().run();
-                } else {
+                }
+                else {
                     showMap(gson.fromJson(history.get(showTurn), MapData.class));
                 }
             }
@@ -691,6 +646,19 @@ public class BombmanServer {
             }
         });
 
+        log.addActionListener(arg -> ((UpdateTask) task).outputLog());
+        readLog.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                task.cancel();
+                JFileChooser fileChooser = new JFileChooser();
+                int res  =fileChooser.showOpenDialog(frame);
+                if(res == JFileChooser.APPROVE_OPTION){
+                   readLogFile(fileChooser.getSelectedFile());
+                }
+            }
+        });
+
         JPanel buttons1 = new JPanel();
         JPanel buttons2 = new JPanel();
         JPanel buttons = new JPanel();
@@ -705,6 +673,10 @@ public class BombmanServer {
         buttons2.add(fast);
         buttons2.add(superFast);
         buttons2.add(retry);
+
+        buttons2.add(log);
+        buttons2.add(readLog);
+
         buttons.setLayout(new BorderLayout());
         buttons.add(buttons1, BorderLayout.NORTH);
         buttons.add(buttons2, BorderLayout.SOUTH);
@@ -730,13 +702,15 @@ public class BombmanServer {
         boolean found = false;
         int start = 0;
         for (int i = 0; i < len; i++) {
-            if (str.charAt(i) == 'âŒ') {
+            if (str.charAt(i) == 'ÁÅ´') {
                 if (found) {
-                } else {
+                }
+                else {
                     found = true;
                     start = i;
                 }
-            } else {
+            }
+            else {
                 if (found) {
                     result.add(new int[]{start, i - start});
                 }
@@ -759,10 +733,8 @@ public class BombmanServer {
 
         StringBuffer result = new StringBuffer();
         players.forEach(p -> {
-            result.append(p.name + "\n"
-                    + "óÕ:" + p.power + " íe:" + p.setBombLimit
-                    + " åv:" + p.totalSetBombCount
-                    + "\n\n");
+            result.append(p.name).append("\n").append("Âäõ:").append(p.power).append(" Âºæ:").append(p.setBombLimit)
+                    .append(" Ë®à:").append(p.totalSetBombCount).append("\n\n");
         });
         infoArea.setText(result.toString());
 
@@ -772,19 +744,17 @@ public class BombmanServer {
 
     class UpdateTask extends TimerTask {
         public void run() {
-            // ÉLÉÉÉâÉNÉ^ÇÃçsìÆ
+            // „Ç≠„É£„É©„ÇØ„Çø„ÅÆË°åÂãï
             String jsonMapData = gson.toJson(mapData);
-            List<ActionData> actions =
-                    players.parallelStream()
-                            .map(p -> p.action(jsonMapData))
-                            .collect(Collectors.toList());
-            actions.forEach(action -> evalPutBombAction(action));
-            actions.forEach(action -> evalMoveAction(action));
+            List<ActionData> actions = players.parallelStream().map(p -> p.action(jsonMapData))
+                    .collect(Collectors.toList());
+            actions.forEach(BombmanServer.this::evalPutBombAction);
+            actions.forEach(BombmanServer.this::evalMoveAction);
 
             turn += 1;
             showTurn = turn;
 
-            // ï«Ç™óéÇøÇƒÇ≠ÇÈ
+            // Â£Å„ÅåËêΩ„Å°„Å¶„Åè„Çã
             if (turn >= 360) {
                 int i = turn - 360;
                 if (i < FALLING_WALL.length) {
@@ -796,7 +766,8 @@ public class BombmanServer {
                         if (b.pos.equals(p)) {
                             b.owner.setBombCount--;
                             return true;
-                        } else {
+                        }
+                        else {
                             return false;
                         }
                     });
@@ -815,7 +786,7 @@ public class BombmanServer {
             //     final Player winner2 = winner;
             //     players.forEach(p->{
             //             if (!(p == winner2)){
-            //                 p.ch = 'ïÊ';
+            //                 p.ch = 'Â¢ì';
             //                 p.isAlive = false;
             //             }
             //         });
@@ -826,7 +797,7 @@ public class BombmanServer {
             }
 
             // get item
-            ArrayList<Item> usedItems = new ArrayList<Item>();
+            ArrayList<Item> usedItems = new ArrayList<>();
             for (Player p : players) {
                 for (Item i : items) {
                     if (p.pos.equals(i.pos)) {
@@ -839,17 +810,18 @@ public class BombmanServer {
 
 
             // bomb explosion
-            fires = new ArrayList<Position>();
-            ArrayList<Bomb> explodeBombs = new ArrayList<Bomb>();
+            fires = new ArrayList<>();
+            ArrayList<Bomb> explodeBombs = new ArrayList<>();
             for (Bomb b : bombs) {
-                if (b.timer <= 0) explodeBombs.add(b);
+                if (b.timer <= 0)
+                    explodeBombs.add(b);
             }
             // chaining
             while (explodeBombs.size() != 0) {
                 explodeBombs.forEach(b -> b.owner.setBombCount -= 1);
                 fires.addAll(explodes(explodeBombs));
                 bombs.removeAll(explodeBombs);
-                explodeBombs = new ArrayList<Bomb>();
+                explodeBombs = new ArrayList<>();
                 for (Bomb b : bombs) {
                     for (Position p : fires) {
                         if (b.pos.equals(p)) {
@@ -859,7 +831,7 @@ public class BombmanServer {
                     }
                 }
             }
-            fires = removeDuplicates(fires, (a, b) -> a.equals(b));
+            fires = removeDuplicates(fires, Position::equals);
 
             // item burning
             items.removeIf(i -> {
@@ -888,13 +860,13 @@ public class BombmanServer {
             players.forEach(p -> {
                 for (Position fire : fires) {
                     if (p.pos.equals(fire)) {
-                        p.ch = 'ïÊ';
+                        p.ch = 'Â¢ì';
                         p.isAlive = false;
                     }
                 }
                 for (Position fire : walls) {
                     if (p.pos.equals(fire)) {
-                        p.ch = 'ïÊ';
+                        p.ch = 'Â¢ì';
                         p.isAlive = false;
                     }
                 }
@@ -904,12 +876,9 @@ public class BombmanServer {
             history.add(gson.toJson(mapData));
             showMap(mapData);
 
-            List<Player> living = players.stream().filter(p -> p.isAlive)
-                    .collect(Collectors.toList());
+            List<Player> living = players.stream().filter(p -> p.isAlive).collect(Collectors.toList());
             if (living.size() == 1) {
-                textArea.append("TURN " + turn + " "
-                        + living.get(0).name
-                        + "ÇÃèüÇøÇ≈Ç∑ÅI\n");
+                textArea.append("TURN " + turn + " " + living.get(0).name + "„ÅÆÂãù„Å°„Åß„ÅôÔºÅ\n");
                 if (stopCheckBox.isSelected()) {
                     this.cancel();
                 }
@@ -917,8 +886,9 @@ public class BombmanServer {
                 //     Thread.sleep(5000);
                 //     newGame();
                 // }catch(InterruptedException e){}
-            } else if (living.size() == 0) {
-                textArea.append("à¯Ç´ï™ÇØÇ≈Ç∑ÅI\n");
+            }
+            else if (living.size() == 0) {
+                textArea.append("Âºï„ÅçÂàÜ„Åë„Åß„ÅôÔºÅ\n");
                 if (stopCheckBox.isSelected()) {
                     this.cancel();
                 }
@@ -931,9 +901,13 @@ public class BombmanServer {
 
         @Override
         public boolean cancel() {
+            outputLog();
+            return super.cancel();
+        }
+
+        public void outputLog() {
             Logger logger = LogManager.getLogger();
             logger.info(String.join(System.lineSeparator(), history));
-            return super.cancel();
         }
     }
 
@@ -956,14 +930,14 @@ public class BombmanServer {
     public static String mapToString(MapData map) {
         char[][] mapArray = new char[HEIGHT][WIDTH];
 
-        fill2(mapArray, 'Å@');
+        fill2(mapArray, '„ÄÄ');
 
         for (int[] b : map.blocks) {
-            mapArray[b[1]][b[0]] = 'Å†';
+            mapArray[b[1]][b[0]] = '‚ñ°';
         }
 
         for (Bomb b : map.bombs) {
-            mapArray[b.pos.y][b.pos.x] = 'Åú';
+            mapArray[b.pos.y][b.pos.x] = '‚óè';
         }
 
         for (Item i : map.items) {
@@ -971,11 +945,11 @@ public class BombmanServer {
         }
 
         for (int[] f : map.fires) {
-            mapArray[f[1]][f[0]] = 'âŒ';
+            mapArray[f[1]][f[0]] = 'ÁÅ´';
         }
 
         for (int[] p : map.walls) {
-            mapArray[p[1]][p[0]] = 'Å°';
+            mapArray[p[1]][p[0]] = '‚ñ†';
         }
 
         for (Player p : map.players) {
@@ -997,7 +971,7 @@ public class BombmanServer {
             System.out.println(action.toString());
             Player p = action.p;
             if (!action.message.equals("")) {
-                textArea.append(action.p.name + "Åu" + action.message + "Åv\n");
+                textArea.append(action.p.name + "„Äå" + action.message + "„Äç\n");
                 textArea.setCaretPosition(textArea.getText().length());
             }
 
@@ -1010,9 +984,7 @@ public class BombmanServer {
                         break;
                     }
                 }
-                if (p.isAlive
-                        && existingBomb == false
-                        && p.canSetBomb()) {
+                if (p.isAlive && !existingBomb && p.canSetBomb()) {
                     p.setBombCount += 1;
                     p.totalSetBombCount += 1;
                     bombs.add(bomb);
@@ -1028,21 +1000,20 @@ public class BombmanServer {
             Player p = action.p;
 
             Position nextPos = null;
-            if (action.dir.equals("UP")) {
+            if ("UP".equals(action.dir)) {
                 nextPos = new Position(p.pos.x, p.pos.y - 1);
-            } else if (action.dir.equals("DOWN")) {
+            }
+            else if ("DOWN".equals(action.dir)) {
                 nextPos = new Position(p.pos.x, p.pos.y + 1);
-            } else if (action.dir.equals("LEFT")) {
+            }
+            else if ("LEFT".equals(action.dir)) {
                 nextPos = new Position(p.pos.x - 1, p.pos.y);
-            } else if (action.dir.equals("RIGHT")) {
+            }
+            else if ("RIGHT".equals(action.dir)) {
                 nextPos = new Position(p.pos.x + 1, p.pos.y);
             }
 
-            if (p.isAlive
-                    && nextPos != null
-                    && !(isWall(nextPos))
-                    && !(isBlock(nextPos))
-                    && !(isBomb(nextPos))) {
+            if (p.isAlive && nextPos != null && !(isWall(nextPos)) && !(isBlock(nextPos)) && !(isBomb(nextPos))) {
                 p.pos = nextPos;
             }
         } catch (Exception e) {
@@ -1052,7 +1023,8 @@ public class BombmanServer {
 
     public static boolean isNearInitPosition(Position pos) {
         for (Position p : NEAR_INIT_POSITIONS) {
-            if (p.equals(pos)) return true;
+            if (p.equals(pos))
+                return true;
         }
         return false;
     }
@@ -1064,28 +1036,32 @@ public class BombmanServer {
 
     public boolean isWall(Position pos) {
         for (Position w : walls) {
-            if (w.equals(pos)) return true;
+            if (w.equals(pos))
+                return true;
         }
         return false;
     }
 
     public boolean isBlock(Position pos) {
         for (Block b : blocks) {
-            if (b.pos.equals(pos)) return true;
+            if (b.pos.equals(pos))
+                return true;
         }
         return false;
     }
 
     public boolean isItem(Position pos) {
         for (Item i : items) {
-            if (i.pos.equals(pos)) return true;
+            if (i.pos.equals(pos))
+                return true;
         }
         return false;
     }
 
     public boolean isBomb(Position pos) {
         for (Bomb b : bombs) {
-            if (b.pos.equals(pos)) return true;
+            if (b.pos.equals(pos))
+                return true;
         }
         return false;
     }
@@ -1101,16 +1077,17 @@ public class BombmanServer {
     ArrayList<Position> rec(String dir, int p, int power, Bomb bom) {
         ArrayList<Position> result = new ArrayList<>();
         while (p <= power) {
-            Position tmp = (dir.equals("up")) ? new Position(bom.pos.x, bom.pos.y - p) :
-                    (dir.equals("down")) ? new Position(bom.pos.x, bom.pos.y + p) :
-                            (dir.equals("left")) ? new Position(bom.pos.x - p, bom.pos.y) :
-                                    new Position(bom.pos.x + p, bom.pos.y);
+            Position tmp = (dir.equals("up")) ? new Position(bom.pos.x, bom.pos.y - p) : (dir
+                    .equals("down")) ? new Position(bom.pos.x, bom.pos.y + p) : (dir.equals("left")) ? new Position(
+                    bom.pos.x - p, bom.pos.y) : new Position(bom.pos.x + p, bom.pos.y);
             if (isWall(tmp)) {
                 break;
-            } else if (isBlock(tmp) || isItem(tmp)) {
+            }
+            else if (isBlock(tmp) || isItem(tmp)) {
                 result.add(tmp);
                 break;
-            } else {
+            }
+            else {
                 result.add(tmp);
                 p += 1;
             }
@@ -1128,8 +1105,7 @@ public class BombmanServer {
         return result;
     }
 
-    public static <T> ArrayList<T> removeDuplicates(ArrayList<T> list,
-                                                    BiFunction<T, T, Boolean> equalFn) {
+    public static <T> ArrayList<T> removeDuplicates(ArrayList<T> list, BiFunction<T, T, Boolean> equalFn) {
         ArrayList<T> result = new ArrayList<>();
         for (T a : list) {
             boolean found = false;
