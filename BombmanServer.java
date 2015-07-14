@@ -1,35 +1,25 @@
-import java.util.*;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.InputStreamReader;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.annotations.Expose;
+import com.google.gson.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Random;
-import java.util.Timer;
-import java.util.function.*;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.util.stream.Collectors;
 import javax.swing.*;
-import javax.swing.text.*;
-import javax.swing.text.html.HTMLDocument;
-import javax.swing.UIManager.*;
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.Rectangle;
+import javax.swing.UIManager.LookAndFeelInfo;
+import javax.swing.text.MutableAttributeSet;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
+import java.awt.*;
 import java.awt.event.*;
-import java.awt.EventQueue;
+import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.List;
+import java.util.Timer;
+import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 
 class Position {
     public int x;
@@ -646,7 +636,7 @@ public class BombmanServer {
             }
         });
 
-        log.addActionListener(arg -> ((UpdateTask) task).outputLog());
+//        log.addActionListener(arg -> ((UpdateTask) task).outputLog());
         readLog.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
@@ -694,6 +684,20 @@ public class BombmanServer {
                 field.requestFocusInWindow();
             }
         });
+    }
+
+    private void readLogFile(File logFile) {
+        List<String> strList = new ArrayList<>();
+
+        try {
+            Path path = Paths.get(logFile.getAbsolutePath());
+            Files.lines(path, Charset.forName("UTF-8"))
+                    .filter(l -> l.matches("^(\\d{4})-(\\d{2})-(\\d{2}).*"))
+                    .forEach(strList::add);
+        } catch (IOException ex) {
+            // 省略
+        }
+        System.out.println(String.join(System.lineSeparator(), strList));
     }
 
     static ArrayList<int[]> findFireIndex(String str) {
@@ -880,6 +884,7 @@ public class BombmanServer {
             if (living.size() == 1) {
                 textArea.append("TURN " + turn + " " + living.get(0).name + "の勝ちです！\n");
                 if (stopCheckBox.isSelected()) {
+                    outputLog();
                     this.cancel();
                 }
                 // try{
@@ -890,6 +895,7 @@ public class BombmanServer {
             else if (living.size() == 0) {
                 textArea.append("引き分けです！\n");
                 if (stopCheckBox.isSelected()) {
+                    outputLog();
                     this.cancel();
                 }
                 // try{
@@ -899,14 +905,39 @@ public class BombmanServer {
             }
         }
 
-        @Override
-        public boolean cancel() {
-            outputLog();
-            return super.cancel();
-        }
-
         public void outputLog() {
             Logger logger = LogManager.getLogger();
+//            String playerStr = "{players:[" +
+//                    players.forEach(p -> {
+//                        ""
+//                    });
+//            "{id:1,name:"+ players.get(0).name + ",ch:" + p}]}"
+//            players.forEach(p -> {
+//                for (Position fire : fires) {
+//                    if (p.pos.equals(fire)) {
+//                        p.ch = '墓';
+//                        p.isAlive = false;
+//                    }
+//                }
+//                for (Position fire : walls) {
+//                    if (p.pos.equals(fire)) {
+//                        p.ch = '墓';
+//                        p.isAlive = false;
+//                    }
+//                }
+//            });
+//            history.get(0)
+//            JsonElement jelement = new JsonParser().parse(jj);
+//            JsonObject jobject = jelement.getAsJsonObject();
+//            JsonArray array = jobject.get("players").getAsJsonArray();
+//            JsonObject playerMine = null;
+//            for (JsonElement jsonElement : array) {
+//                JsonObject playerObj = jsonElement.getAsJsonObject();
+//                if (playerObj.get("id").getAsInt() == myId) {
+//                    playerMine = playerObj;
+//                    break;
+//                }
+//            }
             logger.info(String.join(System.lineSeparator(), history));
         }
     }
